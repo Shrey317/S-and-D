@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm build"
+  command = "pnpm deployment:check && pnpm build"
   publish = ".next"
 
 [build.environment]
@@ -7,6 +7,7 @@
   PNPM_VERSION = "12.11.2"
   NEXT_TELEMETRY_DISABLED = "1"
 
-# Configuration only. No site is registered or deployed in Phase 1.
+# First credential-free preview only; no site has been registered or deployed.
+# See docs/deployment-runbook.md before changing this gate for hosted integrations.
 # Netlify automatically supplies its Next.js OpenNext adapter.
 # Configure APP_ENV and secrets in the deployment environment, never here.

@@ -9,6 +9,7 @@
     "pnpm": "12.11.2"
   },
   "scripts": {
+    "deployment:check": "tsx scripts/check-preview-deployment.ts",
     "recovery:local": "tsx scripts/recovery-drill.ts",
     "test:outage": "tsx scripts/test-outage.ts",
     "communications:local": "tsx scripts/local-communications.ts",

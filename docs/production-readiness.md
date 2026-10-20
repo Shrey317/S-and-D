@@ -1,6 +1,6 @@
 # Production readiness ledger
 
-**Not production-ready. Phases 1–9 are approved.** The catalog, accounts, test checkout, payment ledger, administration, communications and reports use local PostgreSQL and real local Supabase Auth with captured email. Hosted Resend, Payfast, Supabase, Google OAuth, SMTP and Cloudinary verification remain deferred. Genuine purchasing and live payments remain gated; local checks do not establish readiness for commercial transactions.
+**Not production-ready. Phases 1–9 and Phase 10 preparation are approved.** The catalog, accounts, test checkout, payment ledger, administration, communications and reports use local PostgreSQL and real local Supabase Auth with captured email. Hosted Resend, Payfast, Supabase, Google OAuth, SMTP and Cloudinary verification remain deferred. Genuine purchasing and live payments remain gated; local checks do not establish readiness for commercial transactions.
 
 ## Functional gates
 
@@ -33,7 +33,9 @@
 - [x] Authorized Excel exports contain formatted totals and inert customer cell values; workbook round-trip checks use the same report snapshot.
 - [x] Store administrator and stock actions append audit/history records; privileged grant/revoke uses the separate operator log pending production retention/recovery signoff.
 - [x] Local customer ownership, per-operation MFA administrator authorization and restricted database capabilities are tested.
-- [ ] All relevant unit/integration/E2E tests and production build pass.
+- [x] Local Phase 9: 91 unit/component tests, 71 database checks, 62 browser cases across the full run and affected-suite rerun, and the production build pass. See [Phase 9 evidence](phase-9-verification.md).
+- [x] Local encrypted restore drill verifies all 33 commerce tables and security definitions; hosted/off-site and Auth recovery remain unverified.
+- [x] Local CSP, outage handling, enlarged-text/keyboard, automated accessibility and lab performance checks pass.
 - [ ] Mobile/browser/accessibility/performance review is complete with no critical issues.
 - [ ] Metadata, canonical URLs, sitemap and verified Product/LocalBusiness structured data are ready.
 
@@ -68,3 +70,5 @@ Review obligations under [POPIA](https://www.justice.gov.za/legislation/acts/201
 ## Release evidence
 
 Before launch, record approved commit/build, migration revision, hosting adapter/runtime, service configurations (names only, no values), test reports, owner approvals, rollback plan, restore evidence and administrator acceptance. Remove noindex/robots restrictions only in that approved release. Never use development customers/orders/passwords in production.
+
+Phase 10 preparation: [deployment runbook](deployment-runbook.md), [release record](release-record.md), and [verification status](phase-10-preparation.md). The initial Netlify build is gated to a credential-free preview; live commerce still requires implementation and acceptance.

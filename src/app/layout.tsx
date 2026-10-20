@@ -28,6 +28,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className="min-h-dvh font-sans antialiased">
         <a
           href="#main-content"
+          tabIndex={0}
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-card focus:p-4 focus:text-primary"
         >
           Skip to content

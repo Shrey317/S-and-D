@@ -2,9 +2,9 @@
 
 Commercial fresh-produce storefront and administration application, being developed in owner-approved phases.
 
-**Current scope: Phase 8 communications and reports.** MFA-protected administration now includes transactional email capture, retry and delivery history, in-app alerts, manual WhatsApp drafts, date-range sales charts and Excel workbooks. Orders are explicitly labelled test records. Hosted Resend, Payfast, Supabase, Google OAuth, SMTP and Cloudinary verification remain deferred. Nothing has been deployed; indexing remains disabled.
+**Current scope: Phase 10 launch preparation.** Phase 9 local hardening is verified. Phase 10 adds a credential-free preview deployment gate, an environment template and deployment/release records. Orders remain explicitly labelled test records. Hosted Resend, Payfast, Supabase, Google OAuth, SMTP and Cloudinary verification remain deferred. Nothing has been deployed; indexing remains disabled.
 
-Local verification: 89 unit/component tests, 71 PostgreSQL checks across the phase, all 46 desktop/mobile browser cases, lint, formatting and the production build passed. See the [Phase 8 verification record](docs/phase-8-verification.md) for evidence and remaining service limits. Earlier phase reports retain their historical results.
+Phase 9 verification: 91 unit/component tests, 71 PostgreSQL checks and all 62 browser cases across the full run and affected-suite rerun passed, along with the production build and encrypted restore drill. See the [Phase 9 verification record](docs/phase-9-verification.md) for evidence, security findings and remaining service limits. Phase 10 preparation is authorized; owner/legal approval, hosted recovery and specific deployment/live-payment approvals remain required before launch. See [Phase 10 preparation](docs/phase-10-preparation.md) for current work.
 
 ## Local setup
 
@@ -33,25 +33,25 @@ For administration, run `pnpm admin:local` after migrations, then `pnpm test:adm
 For communications and reporting, run `pnpm communications:local` after migrations, then `pnpm test:communications` against the prepared disposable database. Rebuild/restart. This enables local email capture with a separate restricted worker login; it sends no external mail. Use `pnpm email:work` or the private administrator capture action to process queued records. See [communications and reporting operations](docs/communications-and-reports.md) for email states, manual WhatsApp actions, report definitions and deferred hosted setup.
 
 ```powershell
-pnpm exec playwright install chromium
+pnpm exec playwright install chromium firefox webkit
 pnpm check
 ```
 
-`pnpm check` runs formatting, lint, type checking, unit/component tests, a production build and Playwright against that built application, in that order. On Linux CI, install browser OS dependencies with `pnpm exec playwright install --with-deps chromium`.
+`pnpm check` runs formatting, lint, type checking, unit/component tests, a production build and Playwright against that built application, in that order. On Linux CI, install browser OS dependencies with `pnpm exec playwright install --with-deps chromium firefox webkit`. Run `pnpm recovery:local` against the idle disposable test database after integration checks, and `pnpm test:outage` after building.
 
-| Command             | Purpose                                                     |
-| ------------------- | ----------------------------------------------------------- |
-| `pnpm dev`          | Local development server                                    |
-| `pnpm build`        | Optimized production build; not a deployment                |
-| `pnpm start`        | Serve the last production build on port 3000                |
-| `pnpm format`       | Format owned source and documentation                       |
-| `pnpm format:check` | Check formatting without edits                              |
-| `pnpm lint`         | Next.js and TypeScript ESLint checks; zero warnings allowed |
-| `pnpm typecheck`    | Generate Next.js route types, then strict TypeScript checks |
-| `pnpm test`         | Unit and component tests                                    |
-| `pnpm test:watch`   | Interactive unit/component testing                          |
-| `pnpm test:e2e`     | Desktop/mobile Chromium tests; requires a successful build  |
-| `pnpm check`        | All current phase checks                                    |
+| Command             | Purpose                                                           |
+| ------------------- | ----------------------------------------------------------------- |
+| `pnpm dev`          | Local development server                                          |
+| `pnpm build`        | Optimized production build; not a deployment                      |
+| `pnpm start`        | Serve the last production build on port 3000                      |
+| `pnpm format`       | Format owned source and documentation                             |
+| `pnpm format:check` | Check formatting without edits                                    |
+| `pnpm lint`         | Next.js and TypeScript ESLint checks; zero warnings allowed       |
+| `pnpm typecheck`    | Generate Next.js route types, then strict TypeScript checks       |
+| `pnpm test`         | Unit and component tests                                          |
+| `pnpm test:watch`   | Interactive unit/component testing                                |
+| `pnpm test:e2e`     | Chromium journeys plus Firefox/WebKit hardening; requires a build |
+| `pnpm check`        | All current phase checks                                          |
 
 Playwright owns a temporary production server at `127.0.0.1:3100`. It refuses to reuse an existing server, preventing tests against stale code. Traces and screenshots are retained on failures and are gitignored.
 
@@ -94,6 +94,13 @@ Playwright owns a temporary production server at `127.0.0.1:3100`. It refuses to
 - [Phase 7 verification record](docs/phase-7-verification.md)
 - [Communications and reporting operations](docs/communications-and-reports.md)
 - [Phase 8 verification record](docs/phase-8-verification.md)
+- [Phase 9 verification record](docs/phase-9-verification.md)
+- [Security review](docs/phase-9-security-review.md)
+- [Backup, recovery and incident runbook](docs/backup-recovery-runbook.md)
+- [Legal content review and owner decisions](docs/legal-content-review.md)
+- [Phase 10 preparation](docs/phase-10-preparation.md)
+- [Deployment and rollback instructions](docs/deployment-runbook.md)
+- [Release record and required inputs](docs/release-record.md)
 - [Storefront components and interaction states](docs/components.md)
 - [Photography sources and licensing](docs/image-assets.md)
 

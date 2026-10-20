@@ -1,0 +1,27 @@
+# Phase 7 verification — 19 October 2026
+
+Owner authorization: “continue to phase 7”, followed by “continue”. The owner explicitly chose local development and deferred hosted service configuration. Phase 8, public deployment and genuine payment activation remain unapproved.
+
+Implemented: server-authorized MFA administration; restricted administration database credentials; overview sales/counts/low-stock/bestsellers/recent orders; product/category/variant editing and archival; configured image upload/deletion and local metadata forms; versioned inventory corrections and immutable stock history; order search, paid fulfilment, cancellation and internal notes; payment/refund links; customer history/spending and exact-address approval; percentage/fixed/product/bundle promotions with codes, dates and redemption limits; editable storefront and fulfilment settings; append-only store audit alongside the payment audit.
+
+Checkout now incorporates authoritative discounts and shared daily capacity. Same-day eligibility requires explicit configuration, positive capacity, open dates, operating hours and both cutoffs. Configuration changes invalidate quotes and address approvals. Orders retain their original contact, price and promotion snapshots. Completion consumes held stock once; cancellation releases it once. Revenue excludes test/unpaid/cancelled/exceptional/fully refunded records and subtracts completed partial refunds.
+
+## Local evidence
+
+- 77 unit/component tests passed, including discount rounding/caps/bundles, configured SAST cutoff, same-day opening, Sunday closing and explicit eligibility/capacity requirements.
+- 60 PostgreSQL integration checks passed across the phase: 16 catalog/migration, 9 account security, 11 checkout, 12 payment and 12 administration checks. The administration suite uses the actual restricted role and exercises denied escalation/ledger/history writes, grant requirements, catalog mutations, stock version/replay races, paid fulfilment and repeated consumption, legacy test cancellation, archival retention, promotions, redemption/capacity races, exact-address approval and genuine sales/refund accounting. Temporary synthetic real-sales eligibility fixtures are removed; no real customer purchase or money transfer occurred.
+- The additive development migration applied without resetting existing development data. Fresh and repeated disposable test migrations passed. Local role bootstrapping succeeded without granting an administrator identity.
+- All 46 desktop/mobile Chromium browser cases passed in one final run, in 3.1 minutes, with no retries or skipped/waived failures. The expanded real-TOTP journey creates a draft product and box variant, corrects stock, archives the product, creates and redeems a discount code, records a verified test receipt, completes fulfilment, adds a note, checks customer/audit history and records an externally completed test refund. Anonymous/customer/MFA boundaries and existing shopping/account flows remain covered.
+- Axe checks passed on the overview, inventory, settings, order and payment pages exercised by the admin journey, alongside existing public/account checks. Desktop overview and mobile inventory/order screenshots were visually reviewed. This is automated Chromium/emulation evidence, not complete WCAG certification or real-device coverage.
+- Final production build, strict TypeScript checks, zero-warning ESLint and repository formatting passed. Build ID: `nrrpKm2ogqhbi41v7a6OG`.
+- The final build runs at `http://127.0.0.1:3000`. Home/cart return HTTP 200; cart responses retain `no-store, max-age=0, private`. The displayed phone formatting is verified against the configured number.
+
+The first full browser run found two issues on both viewports: a regression from the formatted local phone label to an unformatted international display, and a test locator expecting an underscore instead of the human-readable audit heading. Phone formatting was restored from the editable number, the locator was corrected to the actual heading, and the application was rebuilt before the successful full rerun. No failed assertions were removed or relaxed to bypass application behavior.
+
+PostgreSQL and local Supabase Auth/MFA are real services. Auth messages remain captured locally. Cloudinary/provider confirmation calls in existing integration tests are explicitly stubbed. Browser fixtures remain draft/archived so they cannot alter the public sample catalog during parallel tests; cleanup restores consumed inventory and deletes disposable customer/admin fixtures only in `sd_catalog_test`.
+
+## Remaining boundaries
+
+Hosted Cloudinary upload/delivery/deletion, hosted Auth/Google/SMTP, Payfast sandbox callbacks and merchant settings remain unverified. No permanent store administrator was created, and no owner password or authenticator secret is recorded. Use the [administration operating guide](administration-setup.md) and [controlled provisioning procedure](administrator-provisioning.md) for access.
+
+Phase 8 will add email, administrator alerts, manual WhatsApp confirmations, charts and Excel reports. Phase 9 retains full security/performance/accessibility review, operator-log retention, recovery/restore drills and business/policy signoff. Same-day and live delivery rules still need owner-approved operational configuration before launch. Local completion does not establish commercial readiness.

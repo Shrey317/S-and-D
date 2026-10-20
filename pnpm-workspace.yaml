@@ -1,0 +1,20 @@
+packages:
+  - .
+
+saveExact: true
+overrides:
+  'exceljs>uuid': 11.1.1
+  '@prisma/config>deepmerge-ts': 8.0.0
+  'prisma>mysql2': 3.23.1
+engineStrict: true
+strictPeerDependencies: true
+verifyDepsBeforeRun: error
+minimumReleaseAgeStrict: true
+minimumReleaseAgeExclude:
+  - '@testing-library/user-event@14.6.8'
+
+allowBuilds:
+  '@prisma/engines@7.10.0': true
+  'prisma@7.10.0': true
+  'esbuild@0.28.2': true
+  unrs-resolver@1.12.2: true

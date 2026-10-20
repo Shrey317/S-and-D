@@ -1,0 +1,58 @@
+# Testing and troubleshooting
+
+## Current local checks
+
+Phase 9 adds cross-browser hardening checks in Firefox and mobile WebKit, alongside all desktop/mobile Chromium journeys. Install all three engines with `pnpm test:e2e:install`. Run `pnpm recovery:local` while the disposable database is idle after integration suites and before browser tests. It restores to a unique new local database and verifies data/security definitions; see the recovery runbook for its limitations. After building, `pnpm test:outage` uses a separate server on port 3200 with an intentionally unreachable database. Production dependency advisories are checked with `pnpm audit --prod`; the full audit's remaining development-only advisory is recorded separately.
+
+Phase 7 adds `pnpm admin:local` and `pnpm test:admin`. Apply migrations and configure the distinct restricted administration login before building. Twelve real PostgreSQL checks cover capability denial, grants, catalog/variant changes, stock versions/replays, paid fulfilment and consumption races, legacy test cancellation, archival retention, percentage/fixed/bundle discounts, last-redemption races, stale offers, capacity races, exact-address approval and genuine-net-sales/refund accounting. Pure tests cover rounding and same-day opening/closing/cutoff boundaries. The expanded MFA browser journey creates and archives a draft product, adds a box variant, corrects stock, creates/redeems a code, completes a paid order, adds notes, reviews customer/audit records and reconciles a refund on desktop and mobile. Fixture cleanup restores consumed stock and removes only the disposable identities' records in `sd_catalog_test`.
+
+Phase 4 adds `pnpm auth:local` and `pnpm test:accounts`. Run `pnpm test:db` first (it applies fresh migrations and seeds the isolated catalog), then start local Auth and run the account checks. Nine database checks cover owner isolation, RLS without transaction identity, role capability denial, concurrent/default addresses and limits, wishlist idempotence, administrator grants and atomic rate limits. Unit tests cover redirect allowlisting, structured input and signed recovery proof.
+
+`tests/e2e/accounts.spec.ts` uses actual local Supabase Auth, its captured Mailpit messages and temporary `example.test` users. It checks registration/confirmation, sign-in, password recovery/replay, HttpOnly cookies/no-store, profile persistence, address tampering across users, wishlists, forged sessions, administrator metadata escalation, real TOTP verification and MFA requirements after a new sign-in. Tests remove the users and their commerce records. No external email or Google OAuth request is made. Auth journeys explicitly skip without local Auth configuration; a skipped journey is not verified. CI starts local Auth before the full checks, but remote CI itself remains unverified.
+
+Unit tests exercise actual configuration failures: explicit false flags, malformed booleans, missing service credentials, optional blanks, migration/runtime separation, production HTTPS, live-mode rejection and secret redaction/public allowlisting. WhatsApp draft tests exercise normalization, URL encoding and length/empty validation. Component tests exercise draft review/focus recovery, error retry and 404 recovery.
+
+Playwright runs the optimized build on a server it owns at port 3100. Desktop Chromium and Pixel 7 emulation cover runtime exceptions, reflow down to 320 px, keyboard skip navigation, real 404 recovery, protective headers, theme system/persistence/first-frame behavior, drawer focus trapping, responsive navigation, category URL recovery, local-only enquiry preparation and linked public routes. Axe checks the homepage and contact page in both themes with reduced motion. Mobile emulation and automated accessibility checks do not replace real-device/browser/screen-reader testing. Error component retries are exercised with Testing Library; there is no deliberately crashing public route.
+
+Run `pnpm check` after `pnpm exec playwright install chromium firefox webkit`. CI uses `--with-deps chromium firefox webkit` on Linux. Check reports in `playwright-report` and failure artifacts in `test-results`; both are ignored. Do not commit traces containing future customer data or credentials.
+
+Phase 3 adds `pnpm test:db`, run before the browser suite to prepare and verify its isolated PostgreSQL data. It resets only `commerce` and Prisma's migration-history table in the exact loopback database `sd_catalog_test`; the development catalog is not reset. Sixteen checks cover fresh/repeated migrations, seed guards/idempotence, database constraints, reader capability checks, RLS visibility, same-variant filters, literal/injection-safe search, deterministic pagination, decimal prices and protected image persistence/cleanup. Cloudinary network calls are stubbed explicitly because hosted configuration was deferred.
+
+Catalog browser checks add search, filter persistence, mobile filters, pagination, pack prices/stock, quantity bounds, nonexistent products and both-theme accessibility on catalog/product pages. Run tests against the test reader credentials, never an owner or live database. The browser harness clears migration credentials from its server environment.
+
+## Later test requirements
+
+Phase 6 adds `pnpm payments:local` and `pnpm test:payments`. Run after fresh test migrations and checkout setup. Twelve PostgreSQL checks use the actual restricted processor: role/ownership denial, concurrent notification replay, failure followed by late success, expiry races, amount mismatches/extra receipts, cross-order provider references, collection/manual EFT/COD behavior, verified admin receipts, refund request/completion/replay/budget concurrency and unique external refund references. Protocol tests use independently constructed signed fixtures and explicitly stub Payfast server confirmation. Browser tests cover private payment status, forged success URLs, disabled webhook rejection, and receipt/refund actions after real local TOTP verification. Hosted Payfast remains unverified; see the payment setup guide.
+
+Database tests require an isolated PostgreSQL/Supabase development target with real transactions, migrations and RLS tests; do not substitute SQLite. Add concurrent last-item/expiry/payment tests, customer isolation, money/discount/refund invariants, job retries and payment verification cases as the implementation arrives. Never use a production database or genuine card charges for normal tests.
+
+Required final browser journeys: guest browsing, filtering, add to cart, registration, login, address management, checkout, delivery validation, payment sandbox, order history, wishlist, reorder, administrator product updates, order completion, stock reduction, payment failure, duplicate-order prevention, unauthorized administrator access, mobile responsiveness and confirmation workflows. None is marked complete by the Phase 1 smoke suite.
+
+## Troubleshooting
+
+| Symptom                             | Resolution                                                                                                                                            |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Corepack/pnpm cannot reach registry | Check approved network access to registry.npmjs.org; install the packageManager-pinned version. Do not disable TLS verification.                      |
+| Unsupported engine                  | Use `.node-version` (22.23.2). jsdom and Vitest require a sufficiently recent Node 22 patch.                                                          |
+| Lockfile out of date                | For intended dependency edits run `pnpm install`, review lockfile/settings changes, then repeat frozen installation. Do not bypass frozen mode in CI. |
+| Blocked lifecycle script            | Inspect the exact dependency and build script, then explicitly allow that version if needed. Do not enable all scripts.                               |
+| Invalid configuration               | The error lists variable names only. Consult `.env.example`; never paste credential values into logs/issues.                                          |
+| Live mode rejected                  | Expected in Phase 1. Sandbox integration and explicit owner activation approval are prerequisites in later phases.                                    |
+| Playwright executable absent        | Run `pnpm exec playwright install chromium firefox webkit` in the same user context; Linux also needs `--with-deps`.                                  |
+| Port 3100 already used              | Stop the process you own that occupies it; tests intentionally refuse to reuse an unknown server.                                                     |
+| E2E build missing                   | Run `pnpm build` before `pnpm test:e2e`, or use `pnpm check`.                                                                                         |
+| ESLint deprecation warning          | Version is temporarily constrained by eslint-plugin-react peer support; see compatibility document. Update the compatible set together.               |
+
+## Review limits
+
+Local checks do not verify Netlify deployment, Linux CI execution, real service integrations, full accessibility conformance or production readiness. These are separate evidence gates. The Phase 1 record states exactly which checks ran.
+
+## Phase 8 checks
+
+After fresh disposable migrations and the preceding account, checkout, payment and administration setup, run `pnpm communications:local` and `pnpm test:communications`. The suite requires the exact loopback `sd_catalog_test` database. Eleven integration checks exercise the real restricted worker role, transactional event enqueue/rollback, deduplication, concurrent claims, lease expiry and stale-worker fencing, frozen-request retries, review deadlines, early delivery events, recipient suppression, manual WhatsApp state/audit, explicit resends, real-order report qualification, refunds and Excel workbook round trips. Provider sends are explicit test doubles; no Resend API call occurs.
+
+Unit tests verify signed webhook bodies/timestamps, truthful refund templates, delivery-state precedence, Johannesburg ranges, spreadsheet formula-prefix neutralization and environment boundaries. The browser administrator journey uses actual local TOTP, prepares/opens/attests a test WhatsApp draft with the external destination intercepted, acknowledges an alert, captures an email locally, queues an explicit additional copy and downloads the workbook. Anonymous/customer access to communications and exports remains denied. Axe and responsive checks cover the email-detail and report pages. Auth email remains locally captured; no external email or WhatsApp message is sent. See the Phase 8 verification record for actual execution results.
+
+## Phase 5 checks
+
+After the isolated database and Auth setup, run `pnpm checkout:local` and `pnpm test:checkout` before `pnpm check`. The checkout suite uses restricted commerce credentials and temporary fixtures; it checks merges, RLS, stale prices, idempotency, last-unit races, UTC expiry, paid protection, current-price reorder, delivery approval and store suspension. Browser checks cover guest persistence, login return to checkout, collection test orders, confirmation privacy, history, reorder, keyboard-accessible forms and responsive layouts. All checkout is explicitly local test mode; no payments are simulated as successful.

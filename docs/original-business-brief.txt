@@ -1,0 +1,1590 @@
+# S & D FRUIT AND VEG
+# FINAL PRODUCTION WEBSITE IMPLEMENTATION PROMPT — VERSION 1.1
+
+## ROLE AND MISSION
+
+Act as a team of elite senior full-stack engineers, software architects, UI/UX designers, database specialists, e-commerce developers, security engineers, QA specialists and production deployment engineers.
+
+Your task is to plan, design, develop, test, secure, and prepare for the public launch of:
+
+**S & D Fruit and Veg — Premium Online Fresh Produce Store**
+
+This must be a fully functional commercial e-commerce application, not a static website, visual demonstration or incomplete prototype.
+
+The final solution must be beautiful, modern, reliable, fast, mobile-first, secure, accessible, easy for customers to use, and simple for the business owner to manage.
+
+Follow professional production engineering standards.
+
+All development must be conducted in approved phases.
+
+**IMPORTANT: Do not start writing implementation code immediately. First deliver a complete architecture, database schema proposal, visual design specification, implementation plan and risk assessment. Obtain approval before implementing Phase 1.**
+
+---
+
+# SECTION 1 — CONFIRMED BUSINESS REQUIREMENTS
+
+These decisions have been finalised by the business owner. Do not reopen them without a genuine technical, operational or security reason.
+
+### Business identity
+
+Business name: S & D Fruit and Veg
+
+Brand tagline:
+"Freshness You Can Trust. Quality You Can Taste."
+
+Physical address:
+155 Gemsbok Street, Lenasia, 1827, Johannesburg, South Africa.
+
+Business contact:
+083 504 3385
+
+International format:
++27 83 504 3385
+
+Currency:
+South African Rand (ZAR)
+
+Language:
+English
+
+Timezone:
+Africa/Johannesburg
+
+VAT registration:
+**No — the business is not currently VAT-registered.**
+
+### Operating hours
+
+Monday to Saturday:
+08:45 AM – 06:00 PM
+
+Sunday:
+09:00 AM – 04:00 PM
+
+These hours must appear on the Contact page and appropriate storefront locations.
+
+Business hours must be editable from administrator settings.
+
+### Website purpose
+
+The website serves two primary purposes:
+
+1. Allow customers to purchase fruits, vegetables and other grocery products online.
+2. Professionally showcase the business, products, location and services.
+
+### Delivery
+
+Delivery area:
+Lenasia only.
+
+Delivery fee:
+R0.00.
+
+Minimum order:
+None.
+
+Fulfilment methods:
+- Local delivery.
+- Collection from the shop.
+
+Supported delivery options:
+- Same-day delivery when operationally available.
+- Next-day delivery.
+
+Configured ordering cutoff:
+**7:00 PM South African Standard Time (19:00, Africa/Johannesburg).**
+
+Customers must not manually select delivery time slots.
+
+IMPORTANT OPERATIONAL RULE:
+
+The 7:00 PM cutoff is confirmed. However, the store normally closes at 6:00 PM Monday–Saturday and 4:00 PM Sunday.
+
+Do not assume an order placed at 6:30 PM can be delivered the same day.
+
+Separate:
+- Customer ordering cutoff.
+- Same-day fulfilment eligibility.
+- Store operating hours.
+- Expected delivery date.
+
+Implement these as administrator-configurable rules.
+
+Until the business owner confirms the exact same-day fulfilment policy, use conservative customer messaging and do not promise unrealistic same-day delivery.
+
+The administrator must be able to adjust delivery availability and cutoff rules without changing application code.
+
+### Payments
+
+Confirmed payment gateway:
+**Payfast**
+
+Supported payment methods:
+- Online card payment through Payfast.
+- Payfast Instant EFT where enabled.
+- Manual EFT.
+- Cash on delivery.
+- Payment on collection.
+
+Payment confirmation must be handled according to the selected method.
+
+### WhatsApp
+
+Confirmed mode:
+**Manual WhatsApp order confirmations.**
+
+Do not implement or require a paid WhatsApp Business API for version 1.
+
+Instead:
+- Create automatic in-app administrator order notifications.
+- Send email notifications where configured.
+- Provide administrator buttons that open WhatsApp with prefilled order confirmation messages.
+- Allow the administrator to manually send those messages.
+- Record relevant manual communication actions when explicitly marked by the administrator.
+
+Never label an automatically prepared message as successfully delivered.
+
+### Initial product catalog
+
+Approximately 30 products.
+
+Categories:
+1. Fruits.
+2. Vegetables.
+3. Extra.
+
+Supported selling units:
+- Kilograms.
+- Bunches.
+- Packets.
+- Individual items.
+- Boxes.
+
+Products can have multiple variants and prices.
+
+---
+
+# SECTION 2 — TECHNOLOGY ARCHITECTURE
+
+Use the following preferred stack.
+
+### Frontend
+
+- Next.js App Router.
+- React.
+- TypeScript in strict mode.
+- Tailwind CSS.
+- shadcn/ui.
+- Lucide icons.
+- Motion for React for selected interactions.
+
+### Backend
+
+- Next.js Server Components.
+- Server Actions when suitable.
+- Route Handlers for API integrations and webhooks.
+- Zod for request validation.
+- React Hook Form for complex interactive forms.
+
+### Database
+
+- PostgreSQL using Supabase.
+- Prisma ORM.
+- Version-controlled database migrations.
+- Proper indexes, foreign keys and transaction handling.
+
+Verify Prisma/Supabase compatibility with the selected stable versions and database connection-pooling requirements.
+
+### Authentication
+
+- Supabase Auth.
+- Email/password authentication.
+- Google OAuth.
+- Secure authentication callbacks.
+- Password reset.
+- Verified customer identity.
+- Server-side administrator authorisation.
+
+Do not rely solely on client-side role checks.
+
+### Product images
+
+- Cloudinary.
+- Secure administrator-managed uploads.
+- Image optimisation.
+- Responsive product imagery.
+- File type and size validation.
+- Secure deletion and replacement workflows.
+
+### Emails
+
+- Resend.
+- React Email templates.
+- Transactional notifications and delivery logs.
+
+### Online payments
+
+- Payfast.
+- Official supported integration flow.
+- Secure server-generated payment requests.
+- Server-side payment verification.
+- Idempotent notification handling.
+- Payment reconciliation.
+
+### Reporting
+
+- Recharts.
+- ExcelJS.
+
+### Testing
+
+- Vitest.
+- React Testing Library.
+- Playwright.
+- Database and integration tests.
+
+### Hosting
+
+The owner prefers R0 fixed monthly infrastructure expenses initially.
+
+Use a commercially permitted hosting solution.
+
+Netlify Free is the preferred initial candidate, provided full compatibility is verified.
+
+Keep the architecture portable to paid Vercel hosting or another suitable platform.
+
+Do not deploy this commercial store on a non-commercial hosting plan.
+
+Do not assume that free hosting provides guaranteed uptime or unlimited usage.
+
+Explain operational risks relating to free quotas, suspended applications and database availability.
+
+Use pnpm as the package manager.
+
+Use stable, actively maintained dependencies.
+
+Avoid unnecessary abstraction, complexity and packages.
+
+---
+
+# SECTION 3 — BRAND IDENTITY AND UI/UX
+
+Create a premium, fresh, modern fruit-and-vegetable e-commerce experience.
+
+The design should combine:
+
+- Premium modern retail aesthetics.
+- Traditional fresh produce market warmth.
+- Clean and spacious layouts.
+- Excellent product photography.
+- Clear navigation.
+- Strong visual hierarchy.
+- Effortless shopping experiences.
+
+### Brand palette
+
+Primary forest green:
+#174D33
+
+Premium harvest gold:
+#D4A637
+
+Warm ivory:
+#F9F7EF
+
+White:
+#FFFFFF
+
+Deep charcoal:
+#162820
+
+Muted sage background:
+#EAF1E8
+
+Gold should be used as an accent rather than excessively throughout the interface.
+
+### Typography
+
+Use premium readable fonts.
+
+Suggested:
+- DM Sans or Manrope for headings.
+- Inter for body text.
+
+Select the best cohesive pairing.
+
+### Light and dark mode
+
+Both themes are required.
+
+Implement:
+- System preference detection.
+- Manual theme toggle.
+- Persisted preference.
+- Accessible colour contrast.
+- Consistent component styling.
+- No theme hydration flashes.
+
+### Visual components
+
+Create polished versions of:
+
+- Header.
+- Announcement bar.
+- Navigation.
+- Product cards.
+- Category cards.
+- Buttons.
+- Forms.
+- Dropdowns.
+- Filters.
+- Cart drawer.
+- Notification toasts.
+- Modal dialogs.
+- Empty states.
+- Loading skeletons.
+- Confirmation screens.
+- Data tables.
+- Dashboard cards.
+
+### Animations
+
+Use meaningful, subtle animations for:
+- Hero content.
+- Cart updates.
+- Product interactions.
+- Navigation.
+- Mobile menus.
+- Modal transitions.
+- Page elements.
+- Success feedback.
+
+Avoid distracting effects.
+
+Respect reduced-motion preferences.
+
+### Images
+
+Use attractive, correctly licensed development placeholders.
+
+Do not present placeholder images as genuine photographs of S & D Fruit and Veg.
+
+Prepare every component so real images can be substituted through the administrator dashboard later.
+
+---
+
+# SECTION 4 — CUSTOMER WEBSITE
+
+Build the following routes and features.
+
+## 4.1 Homepage — /
+
+Include:
+
+1. Announcement bar.
+2. Premium responsive header.
+3. High-impact produce hero section.
+4. Browse categories section.
+5. Popular products section.
+6. Featured products section.
+7. Why Choose Us section.
+8. How Ordering Works section.
+9. Store location/contact section.
+10. Professional footer.
+
+Primary call to action:
+"Shop Fresh Produce"
+
+Secondary call to action:
+"Explore Categories"
+
+Promote:
+- Fresh produce.
+- Local shopping.
+- Free eligible delivery.
+- Convenient collection.
+- Simple ordering.
+
+Use real database-backed products rather than frontend demonstration arrays.
+
+Do not invent certifications, sourcing claims or business history.
+
+## 4.2 Shop — /shop
+
+Implement:
+- Responsive product grid.
+- Live search.
+- Category filters.
+- Price filtering.
+- Price sorting.
+- Product name sorting.
+- Availability filtering.
+- Featured/popular filtering.
+- Mobile filter drawer.
+- URL-persisted filters.
+- Pagination or scalable result loading.
+- Clear empty states.
+
+## 4.3 Product details — /shop/[slug]
+
+Display:
+- Product name.
+- Images.
+- Description.
+- Category.
+- Available variants.
+- Selected price.
+- Unit.
+- Available quantity or availability.
+- Quantity selector.
+- Add-to-cart button.
+- Wishlist action.
+- Related products.
+
+All variants require distinct identifiers and correct pricing.
+
+Example:
+
+Tomatoes:
+- 500 g — price A.
+- 1 kg — price B.
+- 2 kg — price C.
+
+Prices must be retrieved from the authoritative server-side database.
+
+## 4.4 Cart — /cart
+
+Requirements:
+- Guest cart support.
+- Authenticated cart.
+- Cart merging on login.
+- Selected variant.
+- Quantity changes.
+- Item removal.
+- Subtotal.
+- Discounts.
+- Delivery fee.
+- Total.
+- Stock validation.
+- Continue-shopping link.
+- Checkout button.
+
+Persist carts reliably.
+
+Validate prices and stock again during order placement.
+
+## 4.5 Checkout — /checkout
+
+Authentication is required to place an order.
+
+Guest users can browse the shop and add products to a cart, but must sign in or register to complete checkout.
+
+Checkout must include:
+- Customer contact details.
+- Delivery or collection choice.
+- Saved address or new address.
+- Delivery eligibility validation.
+- Cart summary.
+- Promotion calculation.
+- Payment method.
+- Final amount.
+- Required policy acceptance.
+- Secure order creation.
+
+Prevent duplicate submissions.
+
+Do not create paid orders from unverified payment redirects.
+
+## 4.6 Customer account
+
+Include:
+- Account dashboard.
+- Profile information.
+- Order history.
+- Order details.
+- Saved addresses.
+- Wishlist.
+- Reordering.
+- Password management where supported.
+
+Orders must preserve historical item names, quantities, prices and variant information.
+
+Reordering must use current prices and current stock availability.
+
+## 4.7 About page
+
+Create a polished About Us page.
+
+Use editable, owner-approved business copy.
+
+Do not fabricate the shop's founding date, owners, suppliers or achievements.
+
+## 4.8 Contact page
+
+Display:
+
+Business:
+S & D Fruit and Veg.
+
+Address:
+155 Gemsbok St, Lenasia, 1827.
+
+Telephone:
+083 504 3385.
+
+WhatsApp:
++27835043385.
+
+Opening hours:
+Monday–Saturday 08:45–18:00.
+Sunday 09:00–16:00.
+
+Include:
+- Contact form.
+- Click-to-call link.
+- WhatsApp button.
+- Google Maps integration.
+- Directions link.
+- Delivery information.
+
+Verify the map location before publishing directions.
+
+## 4.9 Supporting pages
+
+Create:
+- Privacy Policy.
+- Terms and Conditions.
+- Delivery and Collection Policy.
+- Returns and Refunds Policy.
+- Cancellation Policy.
+- Account verification.
+- Password reset.
+- Order confirmation.
+- Payment status.
+- Not-found and error pages.
+
+Require business-owner review of legal and policy content before public launch.
+
+---
+
+# SECTION 5 — ORDER AND DELIVERY LOGIC
+
+### Fulfilment methods
+
+1. DELIVERY.
+2. COLLECTION.
+
+### Customer-visible fulfilment states
+
+Maintain a simple experience:
+
+- Pending.
+- Delivered.
+
+For collection orders, use appropriate completion wording such as "Collected".
+
+Internally represent cancellation, refunds and exceptional states separately.
+
+### Payment state
+
+Keep payment status independent of fulfilment status.
+
+Example internal states:
+- UNPAID.
+- AWAITING_PAYMENT.
+- PAID.
+- FAILED.
+- REFUNDED.
+- PARTIALLY_REFUNDED.
+
+### Delivery cutoff
+
+Confirmed nominal cutoff:
+19:00 Africa/Johannesburg.
+
+Required rules:
+
+1. Store the cutoff in administrator settings.
+2. Evaluate dates using the business timezone.
+3. Support same-day and next-day fulfilment.
+4. Respect store opening hours.
+5. Consider operational delivery availability.
+6. Avoid promising fulfilment after available operating capacity.
+7. Allow administrator suspension of delivery.
+8. Show the expected fulfilment date where reliable.
+9. Do not allow customers to select delivery slots.
+10. Clearly distinguish order receipt from a fulfilment promise.
+
+The final same-day eligibility rule must be approved before launch.
+
+### Delivery eligibility
+
+Only approved addresses in Lenasia are eligible.
+
+Implement structured address validation.
+
+Do not trust customer-entered free-text suburb names.
+
+The exact service area must be configurable and owner-approved.
+
+Outside the delivery area:
+- Do not offer delivery.
+- Allow collection where appropriate.
+- Show an informative message.
+
+Delivery is always free for eligible addresses.
+
+There is no minimum order amount.
+
+---
+
+# SECTION 6 — TAX AND CURRENCY HANDLING
+
+### Confirmed VAT status
+
+S & D Fruit and Veg is currently **not VAT-registered**.
+
+Initial configuration:
+
+VAT_REGISTERED = false.
+
+Requirements:
+
+1. Display all product prices in ZAR.
+2. Do not add a separate VAT charge.
+3. Do not display a fictitious VAT registration number.
+4. Do not issue VAT tax invoices while the business is not registered.
+5. Use ordinary receipts or order confirmations with accurate totals.
+6. Avoid misleading "VAT included" messaging.
+7. Show actual discounts and any applicable charges transparently.
+8. Ensure financial exports reflect the actual business tax configuration.
+
+Use decimal-safe financial calculations.
+
+Do not use imprecise floating-point arithmetic for financial totals.
+
+Prepare a configurable tax architecture for future requirements, but do not implement unnecessary VAT charging now.
+
+If the business becomes legally liable for VAT registration or later becomes registered, the tax configuration must be professionally reviewed and updated before enabling VAT-related functionality.
+
+Do not assume that every fruit and vegetable product will necessarily have the same tax treatment under future VAT registration.
+
+---
+
+# SECTION 7 — PAYFAST PAYMENT INTEGRATION
+
+Use Payfast as the confirmed online payment provider.
+
+Support:
+- Card payments.
+- Instant EFT when activated for the merchant.
+
+Also support:
+- Manual EFT.
+- Cash on delivery.
+- Payment on collection.
+
+### Payfast implementation
+
+Follow current official Payfast developer documentation.
+
+Implement:
+- Sandbox mode.
+- Live mode controlled through secure configuration.
+- Server-generated payment requests.
+- Valid payment signatures.
+- Unique merchant order references.
+- Correct amount handling.
+- Verified payment notifications.
+- Transaction reconciliation.
+- Proper error handling.
+- Duplicate notification protection.
+
+### Payment security
+
+Do not:
+- Store raw card information.
+- Trust client-supplied payment amounts.
+- Mark an order as paid because a success page was opened.
+- Accept unverified transaction notifications.
+- Expose merchant credentials.
+- Allow replayed notifications to change accounting incorrectly.
+
+Validate payment notifications using the verification steps required by official Payfast documentation, including signature, source verification, transaction amount and merchant/order identifiers.
+
+Process verified events idempotently.
+
+### Payment process
+
+Customer selects Payfast → Server creates pending order/payment record → Customer enters hosted payment flow → Payfast sends verified notification → Server updates payment record → Order state updates → Notifications are generated.
+
+Handle:
+- Successful payment.
+- Failed payment.
+- Abandoned payment.
+- Duplicate notification.
+- Delayed notification.
+- Incorrect amount.
+- Expired payment.
+- Refund.
+- Payment/order reconciliation.
+
+For Cash on Delivery, Manual EFT and Payment on Collection, show accurate pending payment status until payment is verified or recorded as received.
+
+### Inventory
+
+Create a defined reservation/expiry strategy for pending online payments.
+
+Use database transactions to prevent overselling.
+
+Release reserved stock when payment fails or an unpaid reservation expires.
+
+Do not accidentally release stock for successfully paid orders.
+
+### Refunds
+
+Implement a secure admin-controlled workflow.
+
+A requested refund is not the same as a completed refund.
+
+When an external refund must be performed in the Payfast dashboard or through an available provider capability, record and reconcile that process correctly.
+
+### Live activation
+
+Do not activate live payments before:
+- Merchant account approval.
+- Production credentials.
+- Sandbox testing.
+- Production webhook testing.
+- Successful payment verification.
+- Business-owner approval.
+
+---
+
+# SECTION 8 — WHATSAPP AND EMAIL NOTIFICATIONS
+
+## WhatsApp
+
+Manual WhatsApp confirmations are confirmed.
+
+Do not require a paid WhatsApp Business API.
+
+### Admin flow
+
+When an order is created:
+
+1. Display a new-order alert in the admin dashboard.
+2. Send an admin email when configured.
+3. Provide an "Open WhatsApp Confirmation" action.
+4. Create a professionally written prefilled message.
+5. Open the customer's WhatsApp contact through a supported click-to-chat URL.
+6. Allow the administrator to send the message manually.
+7. Allow the administrator to record that the confirmation was sent.
+
+Suggested message:
+
+"Hello [Customer Name], thank you for ordering from S & D Fruit and Veg! Your order #[Order Number] has been received. Your order total is R[Amount]. Fulfilment: [Delivery/Collection]. We will keep you informed about your order. Thank you for shopping with us!"
+
+Use actual validated order values.
+
+Never expose other customers' details.
+
+The system must not claim a WhatsApp message was sent merely because its link was opened.
+
+### Email
+
+Use Resend.
+
+Customer email notifications:
+- Registration-related notifications.
+- Order confirmation.
+- Payment confirmation.
+- Cancellation.
+- Completion.
+- Refund.
+
+Administrator emails:
+- New order.
+- Important payment exception.
+- Selected stock alerts if useful.
+
+Use branded email templates.
+
+Log email delivery attempts and failures.
+
+Keep email processing separate from critical order transactions so temporary email failures cannot invalidate successful orders.
+
+---
+
+# SECTION 9 — PRODUCT AND INVENTORY MANAGEMENT
+
+Create a complete admin-controlled product system.
+
+### Product fields
+
+- Name.
+- Slug.
+- Category.
+- Description.
+- Images.
+- Status.
+- Featured flag.
+- Variant information.
+- Timestamps.
+
+### Variant fields
+
+- SKU.
+- Unit.
+- Size/quantity.
+- Price.
+- Stock quantity.
+- Low-stock threshold.
+- Availability.
+- Active state.
+
+### Stock features
+
+- Stock adjustment.
+- Stock history.
+- Low-stock alerts.
+- Out-of-stock status.
+- Inventory reservation.
+- Overselling prevention.
+- Administrative correction.
+- Adjustment reason.
+- Audit trail.
+
+Products must become unavailable when insufficient stock remains.
+
+Do not allow customers to purchase unavailable variants.
+
+Deactivated products should remain in historical orders.
+
+### Promotions
+
+Support:
+- Percentage discounts.
+- Fixed discounts.
+- Individual product specials.
+- Promotional bundles.
+- Optional promotional codes.
+- Start and end dates.
+
+Prevent invalid discounts and negative totals.
+
+---
+
+# SECTION 10 — COMPLETE ADMIN DASHBOARD
+
+Route prefix:
+`/admin`
+
+One production administrator.
+
+Implement secure server-side administrator permissions.
+
+### Admin sections
+
+1. Overview.
+2. Products.
+3. Categories.
+4. Inventory.
+5. Orders.
+6. Customers.
+7. Promotions.
+8. Reports.
+9. Audit Logs.
+10. Store Settings.
+
+### Dashboard overview
+
+Display:
+- Daily revenue.
+- Monthly revenue.
+- Number of orders.
+- Pending orders.
+- Completed orders.
+- Bestselling products.
+- Low-stock products.
+- Recent orders.
+- Sales chart.
+- Inventory insights.
+
+Do not count cancelled, unpaid or refunded orders as completed revenue.
+
+### Product administration
+
+Full CRUD for products, variants and categories.
+
+Include:
+- Image uploads.
+- Search.
+- Filtering.
+- Price editing.
+- Stock management.
+- Featured-product management.
+
+### Order administration
+
+Admin can:
+- View all orders.
+- Search orders.
+- View payment status.
+- Review customer details.
+- Complete fulfilment.
+- Cancel orders.
+- Manage permitted refund actions.
+- Add internal notes.
+- Prepare WhatsApp messages.
+- Resend email confirmations where appropriate.
+
+All significant actions must be audited.
+
+### Customer administration
+
+Admin can:
+- Search customer records.
+- View customer profiles.
+- Review order histories.
+- See customer spending information.
+- Manage permitted customer operations.
+
+Passwords and authentication secrets must never be exposed.
+
+### Reports
+
+Required:
+- Daily sales.
+- Monthly sales.
+- Bestselling products.
+- Inventory status.
+- Customer information.
+- Order performance.
+
+Use Recharts for visual reporting.
+
+Use ExcelJS for downloadable Excel reports.
+
+Excel exports should have:
+- Titles.
+- Column headers.
+- Date ranges.
+- Currency formatting.
+- Totals.
+- Useful worksheet formatting.
+
+### Store settings
+
+The administrator must be able to change:
+- Business hours.
+- Contact number.
+- Address.
+- Delivery settings.
+- Delivery cutoff.
+- Delivery availability.
+- Featured products.
+- Basic homepage announcements.
+- Stock alert thresholds.
+- Product information.
+
+Keep sensitive infrastructure credentials in secure environment configuration rather than editable database settings.
+
+---
+
+# SECTION 11 — DATABASE DESIGN
+
+Use PostgreSQL with Prisma.
+
+Propose and implement an appropriately normalized relational schema.
+
+Expected entities:
+
+- UserProfile.
+- Address.
+- Category.
+- Product.
+- ProductVariant.
+- ProductImage.
+- InventoryAdjustment.
+- InventoryReservation.
+- Cart.
+- CartItem.
+- WishlistItem.
+- Order.
+- OrderItem.
+- Payment.
+- PaymentEvent.
+- Refund.
+- Promotion.
+- PromotionRedemption.
+- Notification.
+- ContactSubmission.
+- StoreSettings.
+- AuditLog.
+
+Introduce additional relations where justified.
+
+Important requirements:
+
+- Foreign keys.
+- Unique constraints.
+- Appropriate indexes.
+- Referential integrity.
+- Consistent timestamps.
+- Atomic order and inventory operations.
+- Immutable order item snapshots.
+- Correct decimal financial data.
+- Secure data-access boundaries.
+- Reliable payment reconciliation.
+
+Never duplicate or store plaintext credentials managed by Supabase Auth.
+
+Prevent customers accessing another customer's addresses, cart, orders or personal information.
+
+Ensure all administrator operations are server-authorised.
+
+Document the exact role of Row Level Security in the final architecture.
+
+---
+
+# SECTION 12 — REALISTIC DEVELOPMENT DATA
+
+Seed approximately 30 realistic products.
+
+Examples include:
+- Apples.
+- Bananas.
+- Oranges.
+- Grapes.
+- Mangoes.
+- Lemons.
+- Pineapples.
+- Watermelons.
+- Tomatoes.
+- Potatoes.
+- Onions.
+- Carrots.
+- Spinach.
+- Cabbage.
+- Lettuce.
+- Cucumbers.
+- Peppers.
+- Broccoli.
+- Cauliflower.
+- Garlic.
+- Ginger.
+- Coriander.
+- Chillies.
+- Avocados.
+- Mushrooms.
+- Herbs.
+- Salad packs.
+- Vegetable bundles.
+- Fruit boxes.
+- Seasonal produce.
+
+Use reasonable demonstration prices clearly marked as sample data.
+
+Never present unapproved seed prices as the shop's actual retail prices.
+
+Provide:
+- Development administrator.
+- Development customers.
+- Sample orders.
+- Sample stock records.
+- Sample promotions.
+
+Separate test data from production data.
+
+Do not migrate demonstration passwords or seeded fake customer orders into live production.
+
+Create secure administrator provisioning instructions.
+
+---
+
+# SECTION 13 — SEARCH, SEO AND ACCESSIBILITY
+
+### Search
+
+Support:
+- Product search.
+- Category filtering.
+- Price filtering.
+- Availability filtering.
+- Sorting.
+- Clear empty states.
+
+Ensure performance remains suitable as the catalog grows.
+
+### SEO
+
+Implement:
+- Page-specific titles.
+- Meta descriptions.
+- Semantic HTML.
+- Canonical URLs.
+- Sitemap.
+- robots.txt.
+- Open Graph tags.
+- Product structured data.
+- LocalBusiness structured data based on verified business details.
+- SEO-friendly slugs.
+
+Do not invent reviews, ratings, certifications or business registration details.
+
+### Accessibility
+
+Target WCAG 2.2 AA.
+
+Support:
+- Keyboard navigation.
+- Visible focus states.
+- Accessible forms.
+- Screen-reader labels.
+- Proper heading order.
+- Clear validation.
+- Reduced-motion preferences.
+- Sufficient contrast.
+- Suitable touch targets.
+
+### Performance
+
+Optimise:
+- Core Web Vitals.
+- Lighthouse metrics.
+- Image delivery.
+- Server rendering.
+- Database performance.
+- JavaScript bundle size.
+- Loading behaviour.
+- Mobile responsiveness.
+
+---
+
+# SECTION 14 — SECURITY, PRIVACY AND LEGAL REQUIREMENTS
+
+Implement:
+- HTTPS.
+- Secure sessions.
+- Role-based access control.
+- Server-side validation.
+- Rate limiting.
+- Safe database queries.
+- Secure upload handling.
+- Payment verification.
+- Idempotent order and webhook processing.
+- Appropriate security headers.
+- Secure environment variables.
+- Non-sensitive logging.
+- Access auditing.
+- Customer data protection.
+
+Consider relevant South African requirements, including:
+
+- POPIA.
+- Consumer Protection Act.
+- Electronic Communications and Transactions Act.
+- Applicable business record and privacy obligations.
+
+Prepare:
+- Privacy Policy.
+- Terms and Conditions.
+- Delivery Policy.
+- Refund and Cancellation Policy.
+- Customer information access/deletion processes.
+- Appropriate customer communication consent.
+
+The website must clearly disclose relevant business identity and contact information.
+
+The business owner must approve legal content before launch.
+
+Do not present generated legal content as legally verified.
+
+---
+
+# SECTION 15 — TESTING
+
+Automated tests are mandatory.
+
+### Unit tests
+
+Test:
+- Currency calculations.
+- Variant pricing.
+- Discount logic.
+- Cart totals.
+- Delivery rules.
+- Cutoff logic.
+- Stock availability.
+- Status transitions.
+- Refund calculations.
+
+### Integration tests
+
+Test:
+- Database transactions.
+- Product queries.
+- Authentication.
+- Administrator authorisation.
+- Inventory reservations.
+- Order creation.
+- Payment verification.
+- Duplicate callbacks.
+- Notifications.
+- Stock audit history.
+
+### Playwright end-to-end testing
+
+Cover:
+
+1. Guest browsing.
+2. Product filtering.
+3. Add to cart.
+4. Registration.
+5. Login.
+6. Address management.
+7. Checkout.
+8. Delivery validation.
+9. Payment sandbox.
+10. Order history.
+11. Wishlist.
+12. Reordering.
+13. Admin product updates.
+14. Admin order completion.
+15. Stock reduction.
+16. Payment failure.
+17. Duplicate order prevention.
+18. Unauthorised admin access.
+19. Mobile responsiveness.
+20. Customer confirmation workflows.
+
+Use stable and repeatable tests.
+
+Never perform genuine card charges during normal automated testing.
+
+Each development phase requires successful relevant tests and a production build check when applicable.
+
+---
+
+# SECTION 16 — DEVELOPMENT PHASES
+
+Follow this implementation order.
+
+## PHASE 1 — Foundation and architecture
+
+- Review business requirements.
+- Finalise technical architecture.
+- Initialise project.
+- Configure TypeScript and tooling.
+- Establish folder structure.
+- Configure styling foundation.
+- Configure environment validation.
+- Add testing setup.
+- Document architectural decisions.
+
+## PHASE 2 — Brand design and storefront
+
+- Implement design system.
+- Light/dark theme.
+- Header and footer.
+- Mobile navigation.
+- Homepage.
+- Reusable visual components.
+- Responsive layouts.
+
+## PHASE 3 — Database and products
+
+- Supabase PostgreSQL.
+- Prisma schema.
+- Migrations.
+- Seed data.
+- Categories.
+- Products and variants.
+- Cloudinary integration.
+- Shop and product detail pages.
+
+## PHASE 4 — Authentication and customer accounts
+
+- Supabase Auth.
+- Email/password.
+- Google OAuth.
+- Account management.
+- Address book.
+- Wishlist.
+- Security testing.
+
+## PHASE 5 — Cart, checkout and orders
+
+- Guest cart.
+- Cart persistence.
+- Cart merging.
+- Checkout.
+- Delivery eligibility.
+- Collection.
+- Order creation.
+- Inventory reservations.
+- Order history.
+- Reordering.
+
+## PHASE 6 — Payfast and payment management
+
+- Payment abstraction.
+- Payfast sandbox.
+- Card/Instant EFT integration.
+- Manual EFT.
+- Cash on delivery.
+- Payment on collection.
+- Secure callbacks.
+- Refund workflows.
+- Payment tests.
+
+## PHASE 7 — Admin dashboard
+
+- Admin security.
+- Dashboard.
+- Products.
+- Inventory.
+- Orders.
+- Customers.
+- Promotions.
+- Settings.
+- Audit history.
+
+## PHASE 8 — Email, WhatsApp and reports
+
+- Resend integration.
+- Branded transactional email.
+- Manual WhatsApp confirmation interface.
+- Admin alerts.
+- Reporting charts.
+- Excel exports.
+
+## PHASE 9 — QA and production hardening
+
+- Full test suite.
+- Security review.
+- Performance review.
+- Accessibility review.
+- SEO.
+- Mobile browser checks.
+- Error handling.
+- Legal content review.
+- Backup and recovery preparation.
+
+## PHASE 10 — Production launch
+
+- Commercial hosting configuration.
+- Production environment variables.
+- Production database.
+- Production authentication.
+- Payment merchant activation.
+- Email domain configuration.
+- Real product catalog approval.
+- Business policy approval.
+- Final payment and order tests.
+- Monitoring and backups.
+- Deployment.
+- Launch validation.
+
+Do not activate genuine payment processing without explicit owner approval.
+
+---
+
+# SECTION 17 — STRICT ENGINEERING AND QUALITY REQUIREMENTS
+
+1. Every visible interactive element must perform its advertised function.
+2. Do not create fake checkout functionality.
+3. Do not hard-code prices in frontend components.
+4. Do not trust prices submitted by the browser.
+5. Do not expose sensitive environment variables.
+6. Do not compromise authentication or administrator security.
+7. Do not silently skip migrations or tests.
+8. Do not create unnecessary dependencies.
+9. Do not overengineer the architecture.
+10. Do not mark incomplete integrations as complete.
+11. Do not fabricate business information.
+12. Do not use development credentials in production.
+13. Do not allow negative stock.
+14. Do not falsely mark payments as successful.
+15. Do not automatically send WhatsApp messages in manual mode.
+16. Do not add VAT while the business is configured as non-VAT-registered.
+17. Do not guarantee same-day delivery when operationally impossible.
+18. Do not use prohibited commercial hosting arrangements.
+19. Do not deploy without explicit approval.
+20. Document all operationally important decisions.
+
+Prioritise:
+- Code quality.
+- Security.
+- Maintainability.
+- User experience.
+- Accessibility.
+- Reliability.
+- Scalability appropriate to a small local retailer.
+
+---
+
+# SECTION 18 — ACCEPTANCE CRITERIA
+
+The application is not production-ready until the following are verified:
+
+- Guests can browse the catalog.
+- Customers can register and log in.
+- Google login functions.
+- Products come from PostgreSQL.
+- Variants calculate prices correctly.
+- Cart and checkout work.
+- Inventory prevents overselling.
+- Delivery rules work.
+- Collection works.
+- Payfast sandbox is tested.
+- Live payments are verified before activation.
+- COD and EFT payment states remain accurate.
+- Customers receive configured emails.
+- Administrator can prepare manual WhatsApp confirmations.
+- Customers can see order history.
+- Wishlist and reordering work.
+- Admin can manage products.
+- Admin can manage stock.
+- Admin can process orders.
+- Admin can manage promotions.
+- Reports show genuine data.
+- Excel exports work.
+- Audit logs operate correctly.
+- Sensitive data remains protected.
+- Relevant tests pass.
+- The site is usable on mobile devices.
+- No critical accessibility issues remain.
+- Legal and commercial requirements are approved.
+- Production hosting is configured correctly.
+- Backups and recovery procedures are documented.
+
+Clearly report any incomplete acceptance criteria.
+
+---
+
+# SECTION 19 — REQUIRED DOCUMENTATION
+
+Provide:
+- README.md.
+- Architecture documentation.
+- Environment variable example.
+- Local development instructions.
+- Database setup instructions.
+- Migration guide.
+- Authentication configuration guide.
+- Google OAuth setup.
+- Payfast sandbox instructions.
+- Payfast production activation guide.
+- Cloudinary setup.
+- Resend setup.
+- Testing commands.
+- Deployment instructions.
+- Admin operating guide.
+- Backup and recovery guide.
+- Troubleshooting documentation.
+
+All secrets must remain outside version control.
+
+---
+
+# SECTION 20 — LAUNCH DEPENDENCIES TO TRACK
+
+The following items remain outstanding and must appear in the production readiness checklist.
+
+### 1. Same-day delivery fulfilment rule
+
+The order cutoff is 7:00 PM, but the store closes earlier.
+
+Confirm how same-day delivery can operate after closing time.
+
+Until approved, use a conservative configurable fulfilment policy.
+
+### 2. Payfast merchant account
+
+Obtain production account approval and merchant credentials.
+
+### 3. Official business information
+
+Obtain the verified legal business identity, business email and any required registration details.
+
+### 4. Final product catalog
+
+Replace demonstration products, prices and images with approved live information.
+
+### 5. Approved delivery boundaries
+
+Confirm the exact eligible Lenasia service area.
+
+### 6. Policies
+
+Approve customer privacy, delivery, refunds, cancellation and terms.
+
+### 7. Production configuration
+
+Configure hosting, database, authentication, verified email sender and backup procedures.
+
+None of these dependencies should unnecessarily prevent development of the architecture and core features.
+
+---
+
+# SECTION 21 — REQUIRED FIRST RESPONSE
+
+Do not immediately write code.
+
+Your first response must provide:
+
+**A. Project understanding**
+
+Summarise the confirmed objectives, business rules and functional requirements.
+
+**B. Technical architecture**
+
+Explain the proposed framework, backend, authentication, database, hosting, image service, payment integration, notification systems and testing architecture.
+
+**C. Database schema proposal**
+
+List tables, relationships, key fields, constraints and transactional requirements.
+
+**D. Website sitemap**
+
+List every public, authenticated customer and administrator route.
+
+**E. UI/UX specification**
+
+Describe the visual design, colours, typography, sections, reusable components, theme behaviour and mobile strategy.
+
+**F. Folder structure**
+
+Propose a maintainable project structure.
+
+**G. Detailed phase plan**
+
+Describe all ten development phases, deliverables, risks and acceptance checks.
+
+**H. Business risks and unresolved launch dependencies**
+
+Flag only important unresolved matters. Do not reopen decisions that are confirmed in this specification.
+
+**I. Phase 1 implementation proposal**
+
+Identify exact setup tasks and the files to be created.
+
+Finally, request approval to implement Phase 1.
+
+**Do not begin Phase 2 or later phases without approval.**
+
+---
+
+# FINAL OBJECTIVE
+
+Deliver a premium, polished, responsive, secure, reliable and genuinely production-capable website for S & D Fruit and Veg.
+
+Customers should experience an effortless shopping journey.
+
+The administrator should be able to manage the business efficiently without technical knowledge.
+
+The resulting software must be maintainable, testable, appropriately secure and ready for real-world commercial operation after all required external services and legal/business dependencies have been verified.
+
+**Build a real business application, not merely an impressive-looking frontend.**

@@ -1,0 +1,436 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas = ["commerce"]
+}
+
+enum ProductState {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+  @@schema("commerce")
+}
+
+enum SellingUnit {
+  KG
+  BOX
+  PACK
+  EACH
+  BUNCH
+  BAG
+  @@schema("commerce")
+}
+
+model Category {
+  id String @id @default(uuid()) @db.Uuid
+  slug String @unique @db.VarChar(80)
+  name String @unique @db.VarChar(80)
+  description String
+  position Int @default(0)
+  active Boolean @default(true)
+  products Product[]
+  @@schema("commerce")
+}
+
+model Product {
+  id String @id @default(uuid()) @db.Uuid
+  categoryId String @db.Uuid
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  slug String @unique @db.VarChar(120)
+  name String @db.VarChar(160)
+  description String
+  state ProductState @default(DRAFT)
+  featured Boolean @default(false)
+  isSample Boolean @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  variants ProductVariant[]
+  images ProductImage[]
+  wishlistItems WishlistItem[]
+  @@index([categoryId, state])
+  @@index([state, featured])
+  @@schema("commerce")
+}
+
+model ProductVariant {
+  id String @id @default(uuid()) @db.Uuid
+  productId String @db.Uuid
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  sku String @unique @db.VarChar(80)
+  label String @db.VarChar(80)
+  unit SellingUnit
+  price Decimal @db.Decimal(14, 2)
+  active Boolean @default(true)
+  position Int @default(0)
+  lowStockThreshold Int @default(5)
+  inventory InventoryBalance?
+  @@unique([productId, label])
+  @@index([productId, active, price])
+  @@schema("commerce")
+}
+
+model InventoryBalance {
+  variantId String @id @db.Uuid
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  onHand Int @default(0)
+  reserved Int @default(0)
+  version Int @default(0)
+  @@schema("commerce")
+}
+
+model ProductImage {
+  id String @id @default(uuid()) @db.Uuid
+  productId String @db.Uuid
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  assetId String @unique
+  publicId String @unique
+  version Int
+  format String @db.VarChar(8)
+  width Int
+  height Int
+  alt String @db.VarChar(240)
+  provenance String
+  position Int @default(0)
+  @@index([productId, position])
+  @@schema("commerce")
+}
+
+// A marker is inserted only by the explicit local/test bootstrap. Migrations never enable seeding.
+model DevelopmentMarker {
+  id String @id
+  purpose String
+  @@schema("commerce")
+}
+
+// UUID belongs to Supabase Auth. Passwords and tokens are never stored here.
+model CustomerProfile {
+  id String @id @db.Uuid
+  name String @default("") @db.VarChar(100)
+  phone String @default("") @db.VarChar(20)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  addresses Address[]
+  wishlist WishlistItem[]
+  @@schema("commerce")
+}
+
+model Address {
+  id String @id @default(uuid()) @db.Uuid
+  customerId String @db.Uuid
+  customer CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label String @db.VarChar(40)
+  recipient String @db.VarChar(100)
+  phone String @db.VarChar(20)
+  street String @db.VarChar(200)
+  suburb String @db.VarChar(100)
+  city String @db.VarChar(100)
+  postalCode String @db.VarChar(4)
+  instructions String @default("") @db.VarChar(500)
+  isDefault Boolean @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  @@index([customerId])
+  @@schema("commerce")
+}
+
+model WishlistItem {
+  customerId String @db.Uuid
+  productId String @db.Uuid
+  customer CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@id([customerId, productId])
+  @@schema("commerce")
+}
+
+// Only the migration/operator role can grant or revoke administrator access.
+model AdministratorGrant {
+  customerId String @id @db.Uuid
+  grantedAt DateTime @default(now()) @db.Timestamptz(3)
+  reason String @db.VarChar(500)
+  @@schema("commerce")
+}
+
+model AuthRateLimit {
+  key String @id @db.VarChar(64)
+  hits Int @default(1)
+  expiresAt DateTime @db.Timestamptz(3)
+  @@index([expiresAt])
+  @@schema("commerce")
+}
+
+model Cart {
+  id String @id @default(uuid()) @db.Uuid
+  customerId String? @unique @db.Uuid
+  guestHash String? @unique @db.VarChar(64)
+  expiresAt DateTime @db.Timestamptz(3)
+  consumed Boolean @default(false)
+  version Int @default(0)
+  lines CartLine[]
+  @@schema("commerce")
+}
+model CartLine {
+  cartId String @db.Uuid
+  variantId String @db.Uuid
+  quantity Int
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  @@id([cartId, variantId])
+  @@schema("commerce")
+}
+model Order {
+  id String @id @default(uuid()) @db.Uuid
+  customerId String @db.Uuid
+  key String @db.Uuid
+  fingerprint String @db.VarChar(64)
+  method String @db.VarChar(20)
+  status String @default("PENDING") @db.VarChar(20)
+  paymentStatus String @default("UNPAID") @db.VarChar(30)
+  paymentException String? @db.VarChar(80)
+  total Decimal @db.Decimal(14, 2)
+  snapshot Json
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime @db.Timestamptz(3)
+  reservations InventoryReservation[]
+  payment Payment?
+  @@unique([customerId, key])
+  @@index([customerId, createdAt])
+  @@schema("commerce")
+}
+model InventoryReservation {
+  orderId String @db.Uuid
+  variantId String @db.Uuid
+  quantity Int
+  state String @default("HELD") @db.VarChar(20)
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  @@id([orderId, variantId])
+  @@schema("commerce")
+}
+// Owner/operator configuration. Runtime can read but cannot change eligibility.
+model CheckoutSettings {
+  id String @id
+  version Int @default(1)
+  collectionEnabled Boolean @default(true)
+  deliveryEnabled Boolean @default(false)
+  closedDates String[]
+  suspended Boolean @default(false)
+  cutoff String @default("19:00") @db.VarChar(5)
+  sameDayEnabled Boolean @default(false)
+  sameDayCutoff String @default("16:00") @db.VarChar(5)
+  dailyCapacity Int @default(0)
+  @@schema("commerce")
+}
+
+model EmailMessage {
+  id String @id @default(uuid()) @db.Uuid
+  eventKey String @unique @db.VarChar(200)
+  orderId String @db.Uuid
+  kind String @db.VarChar(40)
+  audience String @db.VarChar(20)
+  payload Json
+  status String @default("PENDING") @db.VarChar(20)
+  attempts Int @default(0)
+  availableAt DateTime @default(now()) @db.Timestamptz(3)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  leaseToken String? @db.Uuid
+  firstAttemptAt DateTime? @db.Timestamptz(3)
+  request Json?
+  mode String? @db.VarChar(20)
+  providerId String? @unique @db.VarChar(100)
+  lastError String? @db.VarChar(120)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([status,availableAt])
+  @@index([orderId])
+  @@schema("commerce")
+}
+model EmailAttempt {
+  id String @id @default(uuid()) @db.Uuid
+  messageId String @db.Uuid
+  number Int
+  status String @db.VarChar(20)
+  detail String @db.VarChar(120)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@unique([messageId,number])
+  @@schema("commerce")
+}
+model EmailDelivery {
+  id String @id @db.VarChar(200)
+  providerId String @db.VarChar(100)
+  type String @db.VarChar(40)
+  occurredAt DateTime @db.Timestamptz(3)
+  receivedAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([providerId])
+  @@schema("commerce")
+}
+model AdminNotification {
+  id String @id @default(uuid()) @db.Uuid
+  eventKey String @unique @db.VarChar(200)
+  orderId String @db.Uuid
+  kind String @db.VarChar(40)
+  readAt DateTime? @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([createdAt])
+  @@schema("commerce")
+}
+model ManualCommunication {
+  id String @id @default(uuid()) @db.Uuid
+  key String @unique @db.Uuid
+  orderId String @db.Uuid
+  actorId String @db.Uuid
+  phone String @db.VarChar(20)
+  text String @db.VarChar(4000)
+  state String @default("PREPARED") @db.VarChar(20)
+  openedAt DateTime? @db.Timestamptz(3)
+  markedAt DateTime? @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([orderId])
+  @@schema("commerce")
+}
+model StoreSettings {
+  id String @id
+  version Int @default(1)
+  phone String @default("+27835043385") @db.VarChar(20)
+  address String @default("155 Gemsbok Street, Lenasia, 1827, Johannesburg, South Africa") @db.VarChar(240)
+  weekdayOpen String @default("08:45") @db.VarChar(5)
+  weekdayClose String @default("18:00") @db.VarChar(5)
+  sundayOpen String @default("09:00") @db.VarChar(5)
+  sundayClose String @default("16:00") @db.VarChar(5)
+  announcement String @default("Free delivery in eligible Lenasia areas") @db.VarChar(240)
+  about String @default("Fresh produce for your everyday shop. Visit S & D Fruit and Veg in Lenasia.") @db.VarChar(3000)
+  @@schema("commerce")
+}
+model AdminAudit {
+  id String @id @default(uuid()) @db.Uuid
+  actorId String @db.Uuid
+  action String @db.VarChar(60)
+  entityId String @db.VarChar(120)
+  detail String @db.VarChar(1000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([createdAt])
+  @@schema("commerce")
+}
+model InventoryAdjustment {
+  id String @id @default(uuid()) @db.Uuid
+  key String @unique @db.Uuid
+  variantId String @db.Uuid
+  actorId String @db.Uuid
+  before Int
+  after Int
+  reason String @db.VarChar(500)
+  orderId String? @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([variantId,createdAt])
+  @@schema("commerce")
+}
+model OrderNote {
+  id String @id @default(uuid()) @db.Uuid
+  orderId String @db.Uuid
+  actorId String @db.Uuid
+  text String @db.VarChar(1000)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([orderId,createdAt])
+  @@schema("commerce")
+}
+model Promotion {
+  id String @id @default(uuid()) @db.Uuid
+  version Int @default(1)
+  name String @db.VarChar(100)
+  code String? @unique @db.VarChar(40)
+  kind String @db.VarChar(20)
+  value Decimal @db.Decimal(14,2)
+  productId String? @db.Uuid
+  bundle Json
+  startsAt DateTime @db.Timestamptz(3)
+  endsAt DateTime @db.Timestamptz(3)
+  active Boolean @default(false)
+  maxUses Int @default(100)
+  perCustomer Int @default(1)
+  redemptions PromotionRedemption[]
+  @@schema("commerce")
+}
+model PromotionRedemption {
+  id String @id @default(uuid()) @db.Uuid
+  promotionId String @db.Uuid
+  promotion Promotion @relation(fields:[promotionId],references:[id],onDelete:Restrict)
+  orderId String @unique @db.Uuid
+  customerId String @db.Uuid
+  discount Decimal @db.Decimal(14,2)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([promotionId,customerId])
+  @@schema("commerce")
+}
+model DeliveryApproval {
+  addressId String @id @db.Uuid
+  customerId String @db.Uuid
+  addressHash String @db.VarChar(64)
+  zoneVersion Int
+  expiresAt DateTime @db.Timestamptz(3)
+  reason String
+  @@schema("commerce")
+}
+
+model Payment {
+  id String @id @default(uuid()) @db.Uuid
+  orderId String @unique @db.Uuid
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  method String @db.VarChar(30)
+  state String @default("UNPAID") @db.VarChar(30)
+  expected Decimal @db.Decimal(14,2)
+  received Decimal @default(0) @db.Decimal(14,2)
+  refunded Decimal @default(0) @db.Decimal(14,2)
+  exception String? @db.VarChar(80)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  receipts PaymentReceipt[]
+  events PaymentEvent[]
+  refunds Refund[]
+  @@schema("commerce")
+}
+model PaymentReceipt {
+  id String @id @default(uuid()) @db.Uuid
+  paymentId String @db.Uuid
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  reference String @unique @db.VarChar(160)
+  amount Decimal @db.Decimal(14,2)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@schema("commerce")
+}
+model PaymentEvent {
+  id String @id @default(uuid()) @db.Uuid
+  paymentId String @db.Uuid
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  key String @unique @db.VarChar(64)
+  kind String @db.VarChar(40)
+  outcome String @db.VarChar(80)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([paymentId,createdAt])
+  @@schema("commerce")
+}
+model Refund {
+  id String @id @default(uuid()) @db.Uuid
+  paymentId String @db.Uuid
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  key String @unique @db.Uuid
+  amount Decimal @db.Decimal(14,2)
+  state String @default("REQUESTED") @db.VarChar(20)
+  reason String @db.VarChar(500)
+  externalReference String? @unique @db.VarChar(160)
+  requestedBy String @db.Uuid
+  completedBy String? @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  completedAt DateTime? @db.Timestamptz(3)
+  @@schema("commerce")
+}
+model PaymentAudit {
+  id String @id @default(uuid()) @db.Uuid
+  actorId String @db.Uuid
+  paymentId String @db.Uuid
+  action String @db.VarChar(40)
+  detail String @db.VarChar(500)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([paymentId,createdAt])
+  @@schema("commerce")
+}

@@ -1,0 +1,33 @@
+# Phase 8 verification — 20 October 2026
+
+Owner authorization: “continue” in response to the Phase 8 approval request, followed by further continuation. Hosted services remain deferred at the owner's direction. Phases 9–10, public deployment and genuine payment activation remain unapproved.
+
+Implemented: branded React Email transactional notices with Resend integration; atomic PostgreSQL outbox and in-app alerts; a restricted communications worker, local capture, frozen-request retries, fenced leases and delivery-event history; authenticated manual WhatsApp preparation/opening/attestation and explicit extra-email copies; Johannesburg date-range sales charts and tables; inventory/customer summaries and order-performance counts; audited ExcelJS downloads with eight formatted worksheets.
+
+Order creation, verified payment, cancellation/expiry, fulfilment, completed refunds and payment exceptions enqueue distinct events. Provider calls occur outside critical order transactions. Local test notices never reach the provider. WhatsApp opening is distinct from an administrator's manual-sending attestation and neither asserts recipient delivery. Refund email avoids displaying the intermediate payment state captured before reconciliation completes.
+
+Sales exclude test/unpaid/cancelled/exceptional orders and retain fully refunded qualifying orders in gross/refund figures with zero net. Refunds are counted as of generation against the original order date. Order-performance counts include all real order states in the chosen range and are labelled separately from revenue. Exact money calculations use integer cents; charts only receive dates and presentation amounts. Workbooks use inert customer text, private/no-store downloads and server authorization.
+
+## Local evidence
+
+- 89 unit/component tests passed, including signed webhook tampering and timestamp rejection, refund-template truthfulness/escaping, negative delivery-event precedence, date bounds, spreadsheet cells and environment gates.
+- 71 PostgreSQL integration checks passed across the phase: 16 catalog/migration, 9 account security, 11 checkout, 12 payment, 12 administration and 11 communications/reporting checks. The final communications rerun includes worker privilege denial, atomic enqueue/rollback/replay, concurrent claims, expired leases, stale-owner fencing, frozen request/idempotency reuse, retry-window review, early/duplicate events, recipient suppression, manual states/audits, refund qualification and workbook round trips.
+- Additive migration `202610190002_communications` applied to development without resetting its data; fresh and repeated disposable test migrations passed. Restricted worker bootstrap succeeded. No administrator identity was granted by setup.
+- All 46 desktop/mobile Chromium browser cases passed in the final run in 3.5 minutes, without retries, skipped cases or waived assertions. The expanded administrator journey verifies actual local TOTP, draft preparation, an authenticated new-tab POST and checked WhatsApp redirect, distinct opening/sending-attestation states, notification acknowledgement, local email capture, explicit extra-copy enqueue and an Excel download. Customer access to communications, reports, exports and the WhatsApp POST is denied.
+- Axe and responsive checks passed on the exercised email/report pages alongside the existing public/account/admin checks. Desktop reports, mobile reports and the mobile WhatsApp confirmation were visually reviewed. The final daily-sales scroll region is keyboard focusable. Downloaded workbooks and screenshots are retained under the ignored `test-results` directory.
+- Production build and strict TypeScript checks passed. Build ID: `o1WHON4IqULpFmA42_v0_`. Zero-warning ESLint and repository formatting passed.
+- The final build runs at `http://127.0.0.1:3000`. Home/cart return HTTP 200, cart retains private/no-store, anonymous export returns 404, and unconfigured email worker/webhook endpoints return 503.
+
+The first browser run was stopped when the React server action navigated the current tab despite the WhatsApp button's new-tab label. A native POST fixed tab targeting. The focused rerun then caught native form posts losing their origin under `no-referrer`; page-level `same-origin` metadata preserves the strict origin check while withholding referrer information from external destinations. The redirect retains `no-referrer` and the new tab uses `noopener`. No origin check was weakened and no assertion was removed to bypass these defects.
+
+A later focused run exposed a test interception gap: Playwright did not intercept the redirected WhatsApp request, and the browser opened WhatsApp's draft landing page with synthetic test order text and the supplied business phone. No message was sent. The corrected harness fetches the real authenticated local POST with redirects disabled, checks the returned destination and then substitutes a local test page. Subsequent checks do not follow that external redirect.
+
+The corrected desktop administrator journey passed. Mobile Axe then identified a daily-sales table scroll region without keyboard focus. The region now has a focus target and accessible label; the unchanged accessibility assertion passed in the final full run. Before that run, fresh/repeated migrations and the 16 catalog/database checks were repeated to clear fixtures from the interrupted run in the disposable test database only.
+
+## Remaining boundaries
+
+No external email, WhatsApp message, public deployment, real purchase or money transfer occurred. Tests use real local PostgreSQL and local Supabase Auth/MFA, captured Auth email, explicit provider doubles and intercepted WhatsApp destinations. Synthetic qualifying sales records exist only in the disposable test database and are removed afterward. No permanent store administrator or owner credentials were created.
+
+Hosted Resend sender/domain verification, actual acceptance/delivery/webhook retries, scheduler execution and recovery, quotas/reputation and production retention remain unverified. Hosted Auth/Google/SMTP, Cloudinary and Payfast remain deferred. Automated Chromium desktop/mobile emulation and Axe checks do not establish real-device coverage, complete accessibility conformance or commercial readiness.
+
+Use [communications and reporting operations](communications-and-reports.md) for local setup, status semantics, manual sending, report definitions, safe retry/reconciliation and hosted configuration. Phase 9 retains comprehensive security, accessibility, performance, SEO, recovery and business/policy review. Phase 10 retains explicitly approved deployment and live activation.

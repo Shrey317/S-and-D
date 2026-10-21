@@ -1,9 +1,15 @@
 import { serverEnvSchema } from './env.schema';
 import { publicEnvSchema } from './env.public';
 
-/** Checks only the first, credential-free hosted preview. Never authorizes a launch. */
+const stagingProject = 'chxpreqcdrmakbyoydnv';
+
+/** Checks the selected preview stage. Never authorizes orders or live payments. */
 export function previewDeploymentIssues(input: Record<string, unknown>): string[] {
   const issues = new Set<string>();
+  const profile = input.DEPLOYMENT_PROFILE ?? 'credential-free';
+  const staging = profile === 'supabase-staging';
+  if (!['credential-free', 'supabase-staging'].includes(String(profile)))
+    issues.add('DEPLOYMENT_PROFILE must be credential-free or supabase-staging.');
   const parsed = serverEnvSchema.safeParse(input);
   if (!parsed.success) {
     for (const issue of parsed.error.issues)
@@ -49,8 +55,12 @@ export function previewDeploymentIssues(input: Record<string, unknown>): string[
     'MANUAL_EFT_ENABLED',
   ];
   for (const field of flags) {
+    if (staging && ['DATABASE_ENABLED', 'AUTH_ENABLED'].includes(field)) {
+      if (input[field] !== 'true') issues.add(`${field} must be true for Supabase staging.`);
+      continue;
+    }
     if (input[field] !== undefined && input[field] !== 'false')
-      issues.add(`${field} must be false for the first hosted preview.`);
+      issues.add(`${field} must be false for this hosted preview.`);
   }
   if (input.PAYFAST_MODE !== undefined && input.PAYFAST_MODE !== 'sandbox')
     issues.add('PAYFAST_MODE must remain sandbox.');
@@ -63,10 +73,53 @@ export function previewDeploymentIssues(input: Record<string, unknown>): string[
     'PAYFAST_TRUSTED_PROXY',
     ...flags,
   ]);
-  // The first preview has no reason to receive any integration credentials.
+  if (staging) {
+    for (const field of [
+      'DATABASE_URL',
+      'ACCOUNT_DATABASE_URL',
+      'NEXT_PUBLIC_SUPABASE_URL',
+      'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+      'AUTH_RATE_LIMIT_SECRET',
+    ])
+      permitted.add(field);
+    if (input.NEXT_PUBLIC_SUPABASE_URL !== `https://${stagingProject}.supabase.co`)
+      issues.add('NEXT_PUBLIC_SUPABASE_URL must identify the approved staging project.');
+    if (
+      !/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(
+        String(input.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? ''),
+      )
+    )
+      issues.add('Use a current Supabase publishable key for staging.');
+    for (const [field, role] of [
+      ['DATABASE_URL', 'sd_catalog_app'],
+      ['ACCOUNT_DATABASE_URL', 'sd_accounts_app'],
+    ] as const) {
+      try {
+        const url = new URL(String(input[field] ?? ''));
+        if (
+          !['postgres:', 'postgresql:'].includes(url.protocol) ||
+          url.hostname !== 'aws-0-eu-west-1.pooler.supabase.com' ||
+          url.port !== '6543' ||
+          url.pathname !== '/postgres' ||
+          url.hash ||
+          decodeURIComponent(url.username) !== `${role}.${stagingProject}` ||
+          !url.password ||
+          url.searchParams.get('sslmode') !== 'verify-full' ||
+          [...url.searchParams.keys()].some((key) => key !== 'sslmode') ||
+          url.searchParams.getAll('sslmode').length !== 1
+        )
+          throw new Error('connection');
+      } catch {
+        issues.add(
+          `${field} must use its restricted staging login, transaction pooler and verified TLS.`,
+        );
+      }
+    }
+  }
+  // Only the explicitly selected stage may receive its integration credentials.
   for (const field of Object.keys(serverEnvSchema.shape)) {
     if (!permitted.has(field) && String(input[field] ?? '').trim())
-      issues.add(`Remove ${field} from the credential-free preview.`);
+      issues.add(`Remove ${field} from this preview deployment.`);
   }
   if (
     Object.entries(input).some(

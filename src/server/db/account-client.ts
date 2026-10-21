@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/generated/prisma/client';
 import { serverEnv } from '@/config/env.server';
 import { assertAccountRole } from './account-permissions';
+import { databaseConnection } from './connection';
 const globalDb = globalThis as unknown as { accountDb?: PrismaClient };
 export async function getAccountDatabase() {
   if (!serverEnv.AUTH_ENABLED || !serverEnv.ACCOUNT_DATABASE_URL)
@@ -10,7 +11,7 @@ export async function getAccountDatabase() {
   globalDb.accountDb ??= new PrismaClient({
     adapter: new PrismaPg(
       {
-        connectionString: serverEnv.ACCOUNT_DATABASE_URL,
+        ...databaseConnection(serverEnv.ACCOUNT_DATABASE_URL),
         options: '-c timezone=UTC',
         max: 3,
         connectionTimeoutMillis: 5000,

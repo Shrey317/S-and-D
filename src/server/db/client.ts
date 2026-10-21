@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/generated/prisma/client';
 import { serverEnv } from '@/config/env.server';
 import { assertStorefrontRole } from './permissions';
+import { databaseConnection } from './connection';
 
 const globalDb = globalThis as unknown as { catalogDb?: PrismaClient };
 export async function getDatabase() {
@@ -11,7 +12,7 @@ export async function getDatabase() {
     globalDb.catalogDb = new PrismaClient({
       adapter: new PrismaPg(
         {
-          connectionString: serverEnv.DATABASE_URL,
+          ...databaseConnection(serverEnv.DATABASE_URL),
           options: '-c timezone=UTC',
           max: 3,
           connectionTimeoutMillis: 5000,

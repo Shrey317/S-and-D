@@ -16,7 +16,7 @@ if (issues.length) {
   process.exitCode = 1;
 } else {
   console.log(
-    'PASS credential-free preview configuration. No services were contacted or deployed.',
+    `PASS ${process.env.DEPLOYMENT_PROFILE ?? 'credential-free'} preview configuration. No services were contacted or deployed.`,
   );
   console.log('This does not verify hosted compatibility or authorize live orders/payments.');
 }

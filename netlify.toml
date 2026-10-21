@@ -7,7 +7,12 @@
   PNPM_VERSION = "12.11.2"
   NEXT_TELEMETRY_DISABLED = "1"
 
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 # First credential-free preview only; no site has been registered or deployed.
 # See docs/deployment-runbook.md before changing this gate for hosted integrations.
-# Netlify automatically supplies its Next.js OpenNext adapter.
+# Compatibility fallback for Netlify's Next.js adapter. Keep this dependency
+# versioned with the project while the automatic adapter is not provisioning a
+# server function for this application.
 # Configure APP_ENV and secrets in the deployment environment, never here.

@@ -67,6 +67,25 @@ const staging = {
 };
 
 describe('Supabase staging deployment gate', () => {
+  it('allows only the restricted admin login and photo credentials in the catalog admin stage', () => {
+    const admin = {
+      ...staging,
+      DEPLOYMENT_PROFILE: 'catalog-admin-staging',
+      ADMIN_DATABASE_URL: connection('sd_admin_app'),
+      CLOUDINARY_ENABLED: 'true',
+      CLOUDINARY_CLOUD_NAME: 'test-cloud',
+      CLOUDINARY_API_KEY: 'test-key',
+      CLOUDINARY_API_SECRET: 'test-secret',
+    };
+    expect(previewDeploymentIssues(admin)).toEqual([]);
+    for (const setting of [
+      { ADMIN_DATABASE_URL: connection('postgres') },
+      { CLOUDINARY_API_SECRET: '' },
+      { PAYMENTS_ENABLED: 'true' },
+      { LOCAL_CHECKOUT_ENABLED: 'true' },
+    ])
+      expect(previewDeploymentIssues({ ...admin, ...setting }).length).toBeGreaterThan(0);
+  });
   it('accepts the selected project with separate restricted pooler logins', () => {
     expect(previewDeploymentIssues(staging)).toEqual([]);
   });

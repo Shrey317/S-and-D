@@ -7,9 +7,9 @@ const stagingProject = 'chxpreqcdrmakbyoydnv';
 export function previewDeploymentIssues(input: Record<string, unknown>): string[] {
   const issues = new Set<string>();
   const profile = input.DEPLOYMENT_PROFILE ?? 'credential-free';
-  const staging = profile === 'supabase-staging';
-  if (!['credential-free', 'supabase-staging'].includes(String(profile)))
-    issues.add('DEPLOYMENT_PROFILE must be credential-free or supabase-staging.');
+  const catalogAdmin = profile === 'catalog-admin-staging';
+  const staging = profile === 'supabase-staging' || catalogAdmin;
+  if (profile !== 'credential-free' && !staging) issues.add('Unknown preview DEPLOYMENT_PROFILE.');
   const parsed = serverEnvSchema.safeParse(input);
   if (!parsed.success) {
     for (const issue of parsed.error.issues)
@@ -55,6 +55,11 @@ export function previewDeploymentIssues(input: Record<string, unknown>): string[
     'MANUAL_EFT_ENABLED',
   ];
   for (const field of flags) {
+    if (catalogAdmin && field === 'CLOUDINARY_ENABLED') {
+      if (input[field] !== 'true')
+        issues.add('Enable Cloudinary for hosted catalog administration.');
+      continue;
+    }
     if (staging && ['DATABASE_ENABLED', 'AUTH_ENABLED'].includes(field)) {
       if (input[field] !== 'true') issues.add(`${field} must be true for Supabase staging.`);
       continue;
@@ -74,6 +79,15 @@ export function previewDeploymentIssues(input: Record<string, unknown>): string[
     ...flags,
   ]);
   if (staging) {
+    if (catalogAdmin) {
+      for (const field of [
+        'ADMIN_DATABASE_URL',
+        'CLOUDINARY_CLOUD_NAME',
+        'CLOUDINARY_API_KEY',
+        'CLOUDINARY_API_SECRET',
+      ])
+        permitted.add(field);
+    }
     for (const field of [
       'DATABASE_URL',
       'ACCOUNT_DATABASE_URL',
@@ -93,6 +107,7 @@ export function previewDeploymentIssues(input: Record<string, unknown>): string[
     for (const [field, role] of [
       ['DATABASE_URL', 'sd_catalog_app'],
       ['ACCOUNT_DATABASE_URL', 'sd_accounts_app'],
+      ...(catalogAdmin ? [['ADMIN_DATABASE_URL', 'sd_admin_app']] : []),
     ] as const) {
       try {
         const url = new URL(String(input[field] ?? ''));

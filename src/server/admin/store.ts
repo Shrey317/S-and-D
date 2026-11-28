@@ -2,7 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import { getDatabase } from '@/server/db/client';
 import { business } from '@/config/business';
-import { categories as defaults } from '@/config/categories';
+import { categories as defaults, sortCategories } from '@/config/categories';
 export const readStoreCategories = cache(async () => {
   try {
     const db = await getDatabase();
@@ -11,7 +11,7 @@ export const readStoreCategories = cache(async () => {
       where: { active: true },
       orderBy: [{ position: 'asc' }, { id: 'asc' }],
     });
-    return rows.map((row) => {
+    return sortCategories(rows).map((row) => {
       const image = defaults.find((c) => c.slug === row.slug) || defaults[2];
       return { ...image, ...row, description: row.description || image.description };
     });

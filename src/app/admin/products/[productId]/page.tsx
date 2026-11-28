@@ -1,3 +1,4 @@
+import { sortCategories } from '@/config/categories';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { z } from 'zod';
@@ -24,7 +25,7 @@ export default async function ProductPage({ params }: { params: Promise<{ produc
     <AdminScreen title={product.name}>
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <Panel title="Product details">
-          <ProductEditor product={product} categories={categories} />
+          <ProductEditor product={product} categories={sortCategories(categories)} />
         </Panel>
         <div className="grid gap-6">
           <Panel title="Images">

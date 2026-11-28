@@ -26,7 +26,6 @@ export const categorySchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
     .max(80),
   description: z.string().trim().max(2000),
-  position: z.coerce.number().int().min(0).max(1000),
   active: z.boolean(),
   reason,
 });

@@ -1,3 +1,4 @@
+import { sortCategories } from '@/config/categories';
 import { adminContext } from '@/server/admin/context';
 import { AdminScreen, Panel, reasonField } from '@/components/admin/ui';
 import { ActionForm } from '@/components/account/action-form';
@@ -13,13 +14,6 @@ function Editor({ category: c }: { category?: Category }) {
         { name: 'name', label: 'Category name', required: true, value: c?.name },
         { name: 'slug', label: 'Category URL slug', required: true, value: c?.slug },
         { name: 'description', label: 'Description', type: 'textarea', value: c?.description },
-        {
-          name: 'position',
-          label: 'Display position',
-          type: 'number',
-          value: String(c?.position ?? 0),
-          required: true,
-        },
         {
           name: 'active',
           label: 'Visible on the storefront',
@@ -43,7 +37,7 @@ export default async function CategoriesPage() {
         <Panel title="New category">
           <Editor />
         </Panel>
-        {rows.map((c) => (
+        {sortCategories(rows).map((c) => (
           <Panel key={c.id} title={c.name}>
             <Editor category={c} />
           </Panel>

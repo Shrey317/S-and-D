@@ -1,3 +1,4 @@
+import { sortCategories } from '@/config/categories';
 import { Prisma, type PrismaClient } from '@/generated/prisma/client';
 import { PAGE_SIZE, type CatalogFilters } from '@/features/catalog/filters';
 import { catalogImage } from '@/features/catalog/images';
@@ -20,11 +21,12 @@ type Row = {
 const likeLiteral = (text: string) => `%${text.replace(/[\\%_]/g, '\\$&')}%`;
 
 export async function readCategories(db: PrismaClient): Promise<CatalogCategory[]> {
-  return db.category.findMany({
+  const rows = await db.category.findMany({
     where: { active: true },
     orderBy: [{ position: 'asc' }, { id: 'asc' }],
     select: { id: true, slug: true, name: true, description: true },
   });
+  return sortCategories(rows);
 }
 
 export async function readCatalog(db: PrismaClient, filters: CatalogFilters, options: Options) {

@@ -25,3 +25,26 @@ export const categories = [
     tone: 'extra',
   },
 ] as const;
+
+type NamedCategory = { name: string; slug: string };
+
+function categoryRank(value: string) {
+  switch (value.trim().toLowerCase().replace(/^fresh[ -]+/, '')) {
+    case 'fruit':
+    case 'fruits':
+      return 0;
+    case 'vegetable':
+    case 'vegetables':
+      return 1;
+    case 'extra':
+    case 'extras':
+      return 2;
+    default:
+      return 3;
+  }
+}
+
+export function sortCategories<T extends NamedCategory>(rows: readonly T[]): T[] {
+  const rank = (row: T) => Math.min(categoryRank(row.slug), categoryRank(row.name));
+  return [...rows].sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name, 'en'));
+}
